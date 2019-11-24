@@ -16,6 +16,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @SuppressWarnings("unused")
     private static final String TAG = Adapter.class.getSimpleName();
+    private LeerClickedElement leerClickedElement;
     private ArrayList<ItemBT> listItemsBT;
 
     private static final int TYPE_VINCULADO= 0;
@@ -25,10 +26,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public Adapter() {
         super();
         this.listItemsBT = new ArrayList<>();
-        Random random = new Random();
+        /*Random random = new Random();
         for(int i = 0; i<50;i++){
             listItemsBT.add(new ItemBT("El vic xd" + i, "10:12:... NUMBER:  "+i, random.nextBoolean()));
-        }
+        }*/
     }
 
     //should create the view, and return a matching ViewHolder,
@@ -43,7 +44,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         //retorna una instancia del tipo ViewHolder (clase estatica que hemos creado) :v
         //como parametro necesita una view, es decir la instancia que acabamos de inflar a partir del layout que le indicamos.
         //de la clase interna :v
-        return new ViewHolder(view);
+        return new ViewHolder(view,leerClickedElement,viewType);
     }
 
     //should fill the ViewHolder with data from item at position position,
@@ -75,26 +76,31 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return listItemsBT.size();
     }
 
-    public Adapter(ArrayList<ItemBT> listItemsBT) {
+    public Adapter(ArrayList<ItemBT> listItemsBT,LeerClickedElement leerClickedElement) {
         super();
         this.listItemsBT = listItemsBT;
+        this.leerClickedElement = leerClickedElement;
     }
 
     //esta clase le da valores a la instancia inflada que nos pasará
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener {
+        private final LeerClickedElement leerClickedElementViewHolder;
+        private final int isVinculado;
         TextView nombreItemBT;
         TextView macItemBT;
 
         View selectOverlay;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView,LeerClickedElement leerClickedElementViewHolder,int isVinculado) {
             super(itemView);
             //retorna un ViewHolder
             //es decir un almacen de objetos que van a referenciar
             this.nombreItemBT = (TextView) itemView.findViewById(R.id.txt_nameBT);
             this.macItemBT = (TextView) itemView.findViewById(R.id.txt_mac);
             this.selectOverlay = itemView.findViewById(R.id.selected_overlay);
+            this.leerClickedElementViewHolder = leerClickedElementViewHolder;
+            this.isVinculado = isVinculado;
 
             //en lugar de pasarle una instancia anonima, se le pasa this, para que llame al metodo que le corresponda de su viewholder.
             itemView.setOnClickListener(this);
@@ -108,6 +114,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             Log.d(TAG, "Item clicked at position " + getLayoutPosition());
             Log.d(TAG, "Item clicked at position " + getAdapterPosition());
           //  this.selectOverlay.setVisibility(View.VISIBLE);
+            this.leerClickedElementViewHolder.clickedElement(
+                    new ItemBT(this.nombreItemBT.getText().toString(),this.macItemBT.getText().toString(),this.isVinculado==TYPE_VINCULADO)
+            );
+
         }
 
         @Override
