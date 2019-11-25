@@ -22,6 +22,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -35,10 +36,14 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothAdapter defaultAdapter;
     public final static int VIC_REQUEST_ENABLE_BT = 1;
+    public final static int VIC_REQUEST_DICOVERABLE = 2;
+
     private Button txtVerDispositivos;
     private Button btn_scanDispositivos;
     RecyclerView recyclerView;
     private ArrayList<BluetoothDevice> listaBluetoothDeviceFound = new ArrayList<>();
+
+    private TextView txtLog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +59,13 @@ public class MainActivity extends AppCompatActivity {
        // BluetoothAdapter defaultAdapter2 = BluetoothAdapter.getDefaultAdapter();
 
         setListenersBts();
+
     }
 
+    BluetoothSocket socket;
     private void setListenersBts() {
 
+        this.txtLog = findViewById(R.id.txt_log);
         this.txtVerDispositivos = findViewById(R.id.btn_verDispositivosBonded);
         this.txtVerDispositivos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                                         boolean b = btD.fetchUuidsWithSdp();
                                         ParcelUuid[] uuids4 = btD.getUuids();
                                         mostrarToast(defaultAdapter.isDiscovering() + " uuids4 ");
-                                        BluetoothSocket socket;
+                                        //BluetoothSocket socket;
 
                                         if(uuids4!=null) {
 
@@ -147,6 +155,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        Button btn_checkconnect = findViewById(R.id.btn_checkConnect);
+        btn_checkconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                txtLog.append("\n"+ socket.isConnected() + " isConnected Socket de clase.");
+
+                try {
+                    txtLog.append("\n" + socket.getInputStream().read() +"\n"+ socket.isConnected() + " isConnected Socket de clase.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //mostrarToast();
+            }
+        });
     }
 
     ArrayList<ItemBT> listaBT = new ArrayList<>();
@@ -218,9 +242,15 @@ public class MainActivity extends AppCompatActivity {
             case MainActivity.VIC_REQUEST_ENABLE_BT:
                 mostrarToast(VIC_REQUEST_ENABLE_BT + " Encendí blutut xd");
                 Log.d("ActivityResult", "Bluetooth turning");
+                Intent visibilidadBT = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                startActivityForResult(visibilidadBT,VIC_REQUEST_DICOVERABLE);
             break;
 
 
+            case MainActivity.VIC_REQUEST_DICOVERABLE:
+                mostrarToast(VIC_REQUEST_DICOVERABLE + "VIC_REQUEST_DICOVERABLE");
+                Log.d("ActivityResult", "VIC_REQUEST_DICOVERABLE");
+                break;
         }
 
 
@@ -231,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
         if(defaultAdapter!=null && !defaultAdapter.isEnabled()){
 
             Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+
             startActivityForResult(enableBT,VIC_REQUEST_ENABLE_BT);
 
         }
